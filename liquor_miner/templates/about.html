@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquor Transaction Association Miner - About Apriori</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+            min-height: 100vh;
+        }
+    </style>
+
+    <!-- Load KaTeX for beautiful math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" xintegrity="sha384-wn8Bfe0p3gUuyS34J+q7T+YkF+h5x1G6/fBw2oH5/Bv7b1T6P6y4qI3j1uX6+7" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js" xintegrity="sha384-0VvUo8v/A/g1e1G3X2Pj2jLwK4/k5WvLzG6d7VjFv2j6P4bVz2Ff2j6G4G4qI3j1uX6+7" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js" xintegrity="sha384-p4hB44+p4Fp1E/6Q+Vp9r9tW6n9e7H6M9Ff5p6J+F4g+I3j1uX6+7" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
+</head>
+<body class="text-gray-800">
+
+    <!-- Navbar (Consistent with other files) -->
+    <nav class="bg-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo/App Name -->
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-indigo-600">
+                       <!-- LIQUOR GLASS LOGO SVG - CORRECTED PATH -->
+                    <svg class="w-6 h-6 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Correct Path for a simple liquor/wine glass -->
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L12 12L6 6M12 12V22M7 22H17"/>
+                    </svg>
+                        LTA Miner
+                    </span>
+                </div>
+                <!-- Nav Links - CORRECTED TO STATIC HTML LINKS -->
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('rules.home') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="{{ url_for('rules.recommend') }}"class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Get Recommendation</a>
+                    <a href="{{ url_for('rules.rules') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Rules</a>
+                    <a href="{{ url_for('rules.about') }}" class="text-indigo-600 font-bold px-3 py-2 rounded-md text-sm font-medium border-b-2 border-indigo-600">About</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border-t-4 border-indigo-500">
+
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-indigo-700 mb-6 border-b-2 border-indigo-200 pb-3">
+                ℹ️ About the Apriori Algorithm
+            </h1>
+            <p class="text-gray-700 mb-4 leading-relaxed">The Apriori algorithm is a classic algorithm used for mining frequent itemsets and deriving association rules from transactional databases. It operates on the principle that any subset of a frequent itemset must also be frequent, which dramatically reduces the search space.</p>
+
+            <h2 class="text-2xl font-bold text-indigo-600 mt-8 mb-4 border-l-4 border-indigo-500 pl-3">
+                Key Metrics Explained
+            </h2>
+
+            <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-2">Support</h3>
+            <p class="text-gray-700 mb-4">Support shows how often items appear together. For the rule A→B, it means the share of transactions that contain both A and B.</p>
+            <p class="text-gray-700 mb-4">A high support value indicates the rule is highly relevant to the overall dataset.</p>
+
+            <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-2">Confidence</h3>
+            <p class="text-gray-700 mb-4">Confidence measures how reliable a rule is. It is the probability that a transaction contains 𝐵 given that it already contains 𝐴.</p>
+            <p class="text-gray-700 mb-4">For example, a confidence of 0.8 means that 80% of customers who buy A also proceed to buy B.</p>
+
+            <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-2">Lift</h3>
+            <p class="text-gray-700 mb-4">Lift measures how much more likely 𝐵 is to be purchased when 𝐴 is purchased, compared to purchasing 𝐵 independently. It shows the strength of the rule above random chance.</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 text-gray-800 mt-12 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
+            Liquor Transaction Association Miner &copy; 2025. Powered by Apriori.
+        </div>
+    </footer>
+
+</body>
+</html>

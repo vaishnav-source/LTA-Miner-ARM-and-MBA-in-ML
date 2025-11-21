@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liquor Transaction Association Miner - Get Recommendation</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f7f7;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Navbar (Consistent with index.html) -->
+    <nav class="bg-white shadow-lg sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <!-- Logo/App Name -->
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-indigo-600">
+                       <!-- LIQUOR GLASS LOGO SVG -->
+                    <svg class="w-6 h-6 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Path for a simple liquor/wine glass -->
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L12 12L6 6M12 12V22M7 22H17"/>
+                    </svg>
+                        LTA Miner
+                    </span>
+                </div>
+                <!-- Nav Links -->
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('rules.home') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="{{ url_for('rules.recommend') }}" class="text-indigo-600 font-bold px-3 py-2 rounded-md text-sm font-medium border-b-2 border-indigo-600">Get Recommendation</a>
+                    <a href="{{ url_for('rules.combo_offers') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium"> Combo Offers</a>
+                    <a href="{{ url_for('rules.rules') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Rules</a>
+                    <a href="{{ url_for('rules.about') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-indigo-700 mb-8 border-b-2 border-indigo-200 pb-3">
+            Recommendation Engine
+        </h1>
+
+        <!-- Form Container -->
+        <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border-t-4 border-indigo-500 mb-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Find Associated Purchases</h2>
+            <p class="text-sm text-gray-500 mb-6">
+                Select an item below. The system will retrieve items that are most frequently purchased together based on the Apriori association rules.
+            </p>
+
+            <!-- Error Message Box (Initially hidden) -->
+            <div id="error-message" class="hidden bg-red-100 text-red-700 p-3 rounded-lg border-l-4 border-red-500 mb-4 font-medium" role="alert">
+                Please select an item from the dropdown to get recommendations.
+            </div>
+
+            <form id="recommendation-form" action="#" method="POST">
+                <label for="item_select" class="block font-semibold text-gray-700 mb-2">Select a Product:</label>
+                <select name="item_select" id="item_select" required class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 mb-6">
+                    <option value="">-- Choose an Item --</option>
+                    <option value="Bourbon Whiskey">Bourbon Whiskey</option>
+                    <option value="Vodka">Vodka</option>
+                    <option value="Tequila">Tequila</option>
+                    <option value="Gin">Gin</option>
+                    <option value="Rum">Rum</option>
+                    <option value="Scotch">Scotch</option>
+                    <option value="Craft Beer">Craft Beer</option>
+                    <option value="Red Wine">Red Wine</option>
+                    <option value="White Wine">White Wine</option>
+                    <option value="Champagne">Champagne</option>
+                </select>
+                <button type="submit" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-medium rounded-full shadow-md hover:bg-indigo-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Get Recommendation
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg mt-8 hidden">
+            <h2 id="results-title" class="text-2xl font-bold text-gray-900 mb-4 border-b pb-2"></h2>
+            <ul id="recommendation-list" class="space-y-3">
+                <!-- Recommendations will be injected here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 text-gray-800 mt-12 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-600">
+            Liquor Transaction Association Miner &copy; 2025. Powered by Apriori.
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('recommendation-form');
+            const itemSelect = document.getElementById('item_select');
+            const resultsSection = document.getElementById('results-section');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsList = document.getElementById('recommendation-list');
+            const errorMessage = document.getElementById('error-message');
+
+            // Function to generate example recommendations based on selected item
+            function generateRecommendations(item) {
+                const recommendationMap = {
+                    'Bourbon Whiskey': [
+                        { item: 'Coca-Cola', confidence: 78 },
+                        { item: 'Ice', confidence: 65 },
+                        { item: 'Whiskey Glasses', confidence: 52 },
+                        { item: 'Cigars', confidence: 45 },
+                        { item: 'Bitters', confidence: 38 }
+                    ],
+                    'Vodka': [
+                        { item: 'Orange Juice', confidence: 82 },
+                        { item: 'Cranberry Juice', confidence: 75 },
+                        { item: 'Tonic Water', confidence: 60 },
+                        { item: 'Lime', confidence: 55 },
+                        { item: 'Red Bull', confidence: 42 }
+                    ],
+                    'Tequila': [
+                        { item: 'Lime', confidence: 85 },
+                        { item: 'Salt', confidence: 72 },
+                        { item: 'Orange Liqueur', confidence: 58 },
+                        { item: 'Margarita Mix', confidence: 50 },
+                        { item: 'Jalapeños', confidence: 35 }
+                    ],
+                    'Gin': [
+                        { item: 'Tonic Water', confidence: 80 },
+                        { item: 'Lemon', confidence: 65 },
+                        { item: 'Vermouth', confidence: 55 },
+                        { item: 'Olives', confidence: 40 },
+                        { item: 'Cucumber', confidence: 35 }
+                    ],
+                    'Rum': [
+                        { item: 'Coca-Cola', confidence: 75 },
+                        { item: 'Pineapple Juice', confidence: 62 },
+                        { item: 'Coconut Cream', confidence: 48 },
+                        { item: 'Lime', confidence: 45 },
+                        { item: 'Ginger Beer', confidence: 40 }
+                    ]
+                };
+
+                return recommendationMap[item] || [
+                    { item: 'Mixers', confidence: 65 },
+                    { item: 'Ice', confidence: 60 },
+                    { item: 'Glassware', confidence: 45 },
+                    { item: 'Snacks', confidence: 40 },
+                    { item: 'Garnishes', confidence: 35 }
+                ];
+            }
+
+
+            // Form submission handler
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const selectedItem = itemSelect.value;
+
+                if (!selectedItem) {
+                    // Show error message (replacing alert())
+                    errorMessage.classList.remove('hidden');
+                    resultsSection.classList.add('hidden');
+                    return;
+                } else {
+                    // Hide error message
+                    errorMessage.classList.add('hidden');
+                }
+
+                // Get recommendations based on selection
+                const recommendations = generateRecommendations(selectedItem);
+
+                // Update results section
+                resultsTitle.textContent = `Top Recommendations for "${selectedItem}"`;
+
+                // Clear previous results
+                resultsList.innerHTML = '';
+
+                // Add new recommendations
+                recommendations.forEach(rec => {
+                    const li = document.createElement('li');
+                    // Use Tailwind classes for attractive list items
+                    li.className = 'bg-blue-50 p-4 rounded-lg border-l-4 border-indigo-500 shadow-sm flex justify-between items-center';
+                    li.innerHTML = `
+                        <span class="font-medium text-gray-800">${rec.item}</span>
+                        <span class="text-sm font-semibold text-indigo-700">${rec.confidence}% Confident</span>
+                    `;
+                    resultsList.appendChild(li);
+                });
+
+                // Show results and scroll to them
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>

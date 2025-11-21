@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LTA Miner - Combo Offer Discovery</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.iife.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        'primary-indigo': '#4f46e5',
+                        'deep-blue': '#004c99',
+                        'primary-blue': '#007bff',
+                        'success-green': '#28a745',
+                    }
+                }
+            }
+        };
+        window.addEventListener('DOMContentLoaded', () => { lucide.createIcons(); });
+    </script>
+
+    <style>
+        :root {
+            --table-blue: #2563eb; /* Medium Blue requested */
+            --table-blue-hover: #1e40af; /* darker on hover */
+        }
+
+
+        /* FORCE general page text to black */
+        body, h1, h2, label, select, p, span, a, nav a {
+            color: black !important;
+        }
+
+        /* Override only the logo to indigo */
+        .nav-logo {
+            color: #4f46e5 !important; /* Indigo-600 */
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+
+        h1 {
+            font-size: 2rem;
+            border-bottom: 2px solid var(--deep-blue);
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            color: var(--deep-blue);
+        }
+
+        /* Filter form */
+        .filter-form {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid #e6e9ef;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: nowrap;
+        }
+
+        .select-wrapper { position: relative; }
+        .filter-select {
+            padding: 10px 14px;
+            width: 260px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: black;
+        }
+
+        .filter-label { font-weight: 600; }
+
+        .btn-primary {
+            background:#4F46E5;
+            color:#fff !important;
+            padding:12px 22px;
+            font-weight:600;
+            border:none;
+            border-radius:999px;
+            display:inline-flex;
+            align-items:center;
+            cursor:pointer;
+            box-shadow:0 4px 10px rgba(79,70,229,0.35);
+            transition:0.2s ease-in-out;
+        }
+
+        .btn-primary:hover{
+            background:#4338CA;
+            box-shadow:0 6px 14px rgba(67,56,202,0.45);
+        }
+
+        nav a {
+            color: #4f46e5 !important;     /* Indigo text color */
+            font-weight: 600;
+        }
+
+        nav a:hover {
+            color: #4338ca !important;     /* Slightly darker indigo on hover */
+        }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 20px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .data-table thead { background: var(--table-blue); color: white; }
+        .data-table th, .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eef2f7;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        /* Recommended item bold + blue */
+        .recommended-item {
+            color: var(--table-blue) !important;
+            font-weight: 700;
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+
+        /* Combo offer link style (clickable) */
+        .combo-link {
+            color: var(--table-blue);
+            font-weight: 500;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            font-family: inherit;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            text-decoration: none;
+        }
+
+        /* hover underline and darker color */
+        .combo-link:hover {
+            color: var(--table-blue-hover);
+            text-decoration: underline;
+        }
+
+        /* Row hover lift & glow */
+        .data-table tbody tr {
+            transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms;
+        }
+        .data-table tbody tr:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(37,99,235,0.08);
+            background-color: #ffffff;
+        }
+
+        /* Highlight selected item label */
+        .highlight-item {
+            color: #d9534f !important;
+            font-weight: bold;
+        }
+
+        .message-box {
+            padding: 14px;
+            border-radius: 6px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        .info-box { background: #e6f7ff; border-left: 4px solid var(--table-blue); }
+        .warning-box { background: #fff3e0; border-left: 4px solid #e67300; }
+        .error { background: #fde8e8; border-left: 4px solid #dc2626; }
+
+        /* Small icon style */
+        .item-icon { font-size: 1.15rem; line-height: 0; }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+        }
+        .modal {
+            background: white;
+            border-radius: 10px;
+            max-width: 720px;
+            width: 95%;
+            padding: 18px;
+            box-shadow: 0 20px 60px rgba(2,6,23,0.2);
+            transform: translateY(-8px);
+        }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+        .modal-body { margin-top:12px; }
+
+        /* Sort caret */
+        .sort-indicator { font-size: 0.75rem; margin-left:8px; opacity:0.9; }
+
+        /* Accessibility focus */
+        .combo-link:focus { outline: 3px solid rgba(37,99,235,0.15); border-radius:4px; }
+
+        @media (max-width: 640px) {
+            .filter-select { width: 160px; }
+            .recommended-item { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+ <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <!-- LOGO: .nav-logo ensures icon + text get indigo despite global black rule -->
+                    <span class="nav-logo text-2xl font-bold">
+                        <svg class="w-6 h-6 inline-block"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2"
+                             viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M18 6L12 12L6 6M12 12V22M7 22H17"/>
+                        </svg>
+                        LTA Miner
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('rules.home') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="{{ url_for('rules.recommend') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Get Recommendation</a>
+                    <a href="{{ url_for('rules.combo_offers') }}" class="text-indigo-600 font-bold px-3 py-2 rounded-md text-sm font-medium border-b-2 border-indigo-600"> Combo Offers</a>
+                    <a href="{{ url_for('rules.rules') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Rules</a>
+                    <a href="{{ url_for('rules.about') }}" class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-6">
+
+        <h1>Combo Offer Discovery</h1>
+
+        {% if error %}
+            <div class="message-box error"><strong>Error:</strong> {{ error }}</div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('rules.combo_offers') }}" class="filter-form">
+
+            <label for="item_select" class="filter-label">Filter Combos by Item:</label>
+
+            <div class="select-wrapper">
+                <select id="item_select" name="item_select" class="filter-select" required>
+                    <option value="" disabled {% if not selected_item %}selected{% endif %}>-- Select or choose All Combos --</option>
+                    <option value="All Combos">All Combos</option>
+
+                    {% for item in unique_items %}
+                        <option value="{{ item }}" {% if selected_item == item %}selected{% endif %}>{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+                Filter Offers
+            </button>
+
+        </form>
+
+        {% if not is_filtered %}
+            <div class="message-box info-box">
+                <strong>Welcome!</strong> Select an item and click <em>Filter Offers</em> to view combos.
+            </div>
+        {% endif %}
+
+        {% if is_filtered %}
+
+            {% if selected_item != "All Combos" %}
+                <p>Combo Offers Recommending: <span class="highlight-item">{{ selected_item }}</span></p>
+            {% else %}
+
+            {% endif %}
+
+            {% if all_combos %}
+                <table class="data-table" id="combos-table" aria-describedby="combos-desc">
+                    <thead>
+                        <tr>
+                            <th role="button" data-col="consequent" class="cursor-pointer">
+                                Selected Item
+                                <span class="sort-indicator" id="sort-consequent">↕</span>
+                            </th>
+                            <th role="button" data-col="antecedent" class="cursor-pointer">
+                                Combo Offer
+                                <span class="sort-indicator" id="sort-antecedent">↕</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for rule in all_combos %}
+                            <tr>
+                                <td class="recommended-item" data-recommended="{{ rule.consequent }}">
+                                    <span class="item-icon" aria-hidden="true"></span>
+                                    <span class="item-text">{{ rule.consequent }}</span>
+                                </td>
+
+                                <td>
+                                    <button class="combo-link"
+                                            type="button"
+                                            data-antecedent="{{ rule.antecedent | join(', ') }}"
+                                            data-consequent="{{ rule.consequent }}">
+                                        <span class="combo-text">{{ rule.antecedent | join(', ') }}</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="message-box warning-box">No combo offers found.</div>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal" role="document" aria-labelledby="modal-title">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-title" class="text-lg font-semibold">Combo Details</h3>
+                    <p id="modal-sub" class="text-sm text-gray-600">Details about selected combo</p>
+                </div>
+                <button id="modal-close" aria-label="Close modal" class="text-gray-600 hover:text-gray-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M10 8.586l4.95-4.95a1 1 0 111.414 1.414L11.414 10l4.95 4.95a1 1 0 11-1.414 1.414L10 11.414l-4.95 4.95a1 1 0 11-1.414-1.414L8.586 10 3.636 5.05A1 1 0 115.05 3.636L10 8.586z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-2">
+                    <strong>Recommended Item:</strong>
+                    <div class="flex items-center gap-3 mt-2">
+                        <span id="modal-reco-icon" class="item-icon"></span>
+                        <span id="modal-reco" class="font-semibold"></span>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <strong>Combo Offer Items:</strong>
+                    <ul id="modal-items" class="list-disc list-inside mt-2"></ul>
+                </div>
+
+                <div class="mb-1 text-sm text-gray-600">
+                    Tip: use combos to create promotional bundles or in-store cross-sells.
+                </div>
+
+                <div class="mt-4 text-right">
+                    <button id="modal-close-2" class="btn-primary">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+        // Assign icons to each recommended cell (on DOM ready)
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.recommended-item').forEach(td => {
+                const recommended = (td.dataset.recommended || td.querySelector('.item-text')?.textContent || '').trim();
+                const icon = chooseIconFor(recommended);
+                const iconSpan = td.querySelector('.item-icon');
+                if (iconSpan) iconSpan.textContent = icon;
+            });
+
+            // Make combo button icons (optional: show small icon for first antecedent word)
+            document.querySelectorAll('.combo-link').forEach(btn => {
+                const antecedentStr = btn.dataset.antecedent || '';
+                const firstItem = antecedentStr.split(',')[0] || '';
+                const ico = chooseIconFor(firstItem);
+                // prepend a small span for icon if not present
+                if (!btn.querySelector('.combo-icon')) {
+                    const span = document.createElement('span');
+                    span.className = 'combo-icon item-icon';
+                    span.style.opacity = '0.98';
+                    span.textContent = ico;
+                    btn.prepend(span);
+                }
+            });
+
+            // Add click handlers to open modal with details
+            const modal = document.getElementById('modal-backdrop');
+            const modalReco = document.getElementById('modal-reco');
+            const modalRecoIcon = document.getElementById('modal-reco-icon');
+            const modalItems = document.getElementById('modal-items');
+            const closeBtns = [document.getElementById('modal-close'), document.getElementById('modal-close-2')];
+
+            document.querySelectorAll('.combo-link').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const antecedent = btn.dataset.antecedent || '';
+                    const consequent = btn.dataset.consequent || '';
+                    openModal({ consequent, antecedent });
+                });
+            });
+
+            closeBtns.forEach(b => b && b.addEventListener('click', closeModal));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(); // click backdrop closes
+            });
+
+            function openModal({ consequent, antecedent }) {
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                modalReco.textContent = consequent;
+                modalRecoIcon.textContent = chooseIconFor(consequent);
+                // fill items list
+                modalItems.innerHTML = '';
+                const items = antecedent.split(',').map(s => s.trim()).filter(Boolean);
+                items.forEach(it => {
+                    const li = document.createElement('li');
+                    li.textContent = it;
+                    modalItems.appendChild(li);
+                });
+                // focus for accessibility
+                document.getElementById('modal-close').focus();
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('modal-backdrop');
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            // SORTING: Click header to sort table
+            const table = document.getElementById('combos-table');
+            if (table) {
+                const tbody = table.querySelector('tbody');
+                const headers = table.querySelectorAll('thead th');
+                const sortState = { consequent: null, antecedent: null }; // null / 'asc' / 'desc'
+
+                headers.forEach(th => {
+                    th.addEventListener('click', () => {
+                        const col = th.dataset.col;
+                        if (!col) return;
+                        // toggle sort state
+                        sortState[col] = sortState[col] === 'asc' ? 'desc' : 'asc';
+                        // reset other column indicator
+                        Object.keys(sortState).forEach(k => {
+                            if (k !== col) sortState[k] = null;
+                        });
+                        // do sort
+                        sortTableBy(col, sortState[col]);
+                        // update indicators
+                        updateSortIndicators(sortState);
+                    });
+                });
+
+                function getCellText(row, col) {
+                    if (col === 'consequent') {
+                        return row.querySelector('.item-text')?.textContent?.trim() || '';
+                    } else if (col === 'antecedent') {
+                        return row.querySelector('.combo-text')?.textContent?.trim() || '';
+                    }
+                    return '';
+                }
+
+                function sortTableBy(col, direction) {
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    rows.sort((a,b) => {
+                        const A = getCellText(a,col).toLowerCase();
+                        const B = getCellText(b,col).toLowerCase();
+                        if (A < B) return direction === 'asc' ? -1 : 1;
+                        if (A > B) return direction === 'asc' ? 1 : -1;
+                        return 0;
+                    });
+                    // re-append
+                    rows.forEach(r => tbody.appendChild(r));
+                }
+
+                function updateSortIndicators(state) {
+                    const indConsequent = document.getElementById('sort-consequent');
+                    const indAntecedent = document.getElementById('sort-antecedent');
+                    indConsequent.textContent = state.consequent === 'asc' ? '▲' : state.consequent === 'desc' ? '▼' : '↕';
+                    indAntecedent.textContent = state.antecedent === 'asc' ? '▲' : state.antecedent === 'desc' ? '▼' : '↕';
+                }
+            }
+
+            // Keyboard: close modal with ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('modal-backdrop');
+                    if (modal && modal.style.display === 'flex') {
+                        closeModal();
+                    }
+                }
+            });
+
+        }); // DOMContentLoaded end
+    </script>
+
+</body>
+</html>
